@@ -14,6 +14,7 @@ class Pom extends EventEmitter {
       state: Pom.STATES.NEW
     }, options);
     this.type = opts.type;
+    this.state = opts.state;
     this.duration = opts.duration || DURATION_DEFAULTS[opts.type];
     this.remaining = this.duration;
     this.elapsed = 0;
@@ -30,13 +31,16 @@ class Pom extends EventEmitter {
     if (!this.toState(Pom.STATES.PAUSE)) return false;
     this.cycles++;
     clearInterval(this.timer);
+    return true;
   }
   play () {
     if (!this.toState(Pom.STATES.PLAY)) return false;
     this._timestamp = Date.now();
     this.timer = setInterval(this.tick.bind(this), 250);
+    return true;
   }
   toState (state) {
+    console.log('attempting state change', this.state, state);
     const valid = {};
     valid[Pom.STATES.NEW] = [];
     valid[Pom.STATES.PLAY] = [Pom.STATES.NEW, Pom.STATES.PAUSE];
