@@ -10,76 +10,30 @@ class Pom extends EventEmitter {
   constructor (options) {
     super();
     const opts = Object.assign({}, {
-      type: 'work',
-      state: Pom.STATES.NEW
+      type: 'work'
     }, options);
     this.type = opts.type;
-    this.state = opts.state;
+    this.state = Pom.STATES.new;
     this.duration = opts.duration || DURATION_DEFAULTS[opts.type];
     this.remaining = this.duration;
     this.elapsed = 0;
-    this.cycles = 0;
+  }
+  get isPlayable () {
+    return (this.remaining > 0);
   }
   cancel () {
-    this.pause();
-    this.toState(Pom.STATE.CANCELED);
+    this.state = Pom.STATES.canceled;
   }
-  done () {
-    this.toState(Pom.STATES.DONE);
-  }
-  pause () {
-    if (!this.toState(Pom.STATES.PAUSE)) return false;
-    this.cycles++;
-    clearInterval(this.timer);
-    return true;
-  }
-  play () {
-    if (!this.toState(Pom.STATES.PLAY)) return false;
-    this._timestamp = Date.now();
-    this.timer = setInterval(this.tick.bind(this), 250);
-    return true;
-  }
-  toState (state) {
-    console.log('attempting state change', this.state, state);
-    const valid = {};
-    valid[Pom.STATES.NEW] = [];
-    valid[Pom.STATES.PLAY] = [Pom.STATES.NEW, Pom.STATES.PAUSE];
-    valid[Pom.STATES.PAUSE] = [Pom.STATES.PLAY];
-    valid[Pom.STATES.CANCELED] = [Pom.STATES.NEW,
-      Pom.STATES.PLAY, Pom.STATES.PAUSE];
-    valid[Pom.STATES.DONE] = [Pom.STATES.PLAY];
-    if (typeof valid[state] === 'undefined' ||
-        !valid[state].includes(this.state)) {
-      return false;
-    }
-    this.state = state;
-    for (var key in Pom.STATES) {
-      if (Pom.STATES[key] === this.state) {
-        this.emit(key.toLowerCase());
-        return true;
-      }
-    }
-  }
-  tick () {
-    const now = Date.now();
-    const change = now - this._timestamp;
-    this.elapsed += change;
-    this.remaining -= change;
-    this._timestamp = Date.now();
-    if (this.remaining <= 0) {
-      this.done();
-    } else {
-      this.emit('tick');
-    }
+  complete () {
+    this.state = Pom.STATES.complete;
   }
 }
 
 Pom.STATES = {
-  NEW: 0,
-  PLAY: 1,
-  PAUSE: 2,
-  CANCELED: 3,
-  DONE: 4
+  new: 0,
+  active: 1,
+  complete: 2,
+  canceled: 3
 };
 
 module.exports = Pom;
