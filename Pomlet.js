@@ -1,6 +1,7 @@
 'use strict';
 const Pom = require('./Pom');
 const EventEmitter = require('events');
+const moment = require('moment');
 
 class Pomlet extends EventEmitter {
   constructor () {
@@ -10,20 +11,38 @@ class Pomlet extends EventEmitter {
     return this.poms.filter(pom => pom.type === 'work').length;
   }
   get remaining () {
+    const timeHolder = moment();
     const remainingMS = this.pom.remaining;
     const remainingSecs = remainingMS / 1000;
+    const minutes = Math.floor(remainingSecs / 60);
+    const seconds = Math.floor(remainingSecs % 60);
+    timeHolder.minute(minutes);
+    timeHolder.second(seconds);
     return {
       ms: remainingMS,
-      minutes: Math.floor(remainingSecs / 60),
-      seconds: Math.floor(remainingSecs % 60)
+      minutes: minutes,
+      seconds: seconds,
+      moment: timeHolder
     };
   }
   get totalTime () {
-    return 0;
+    const workPoms = this.poms.filter(pom => pom.type === 'work');
+    const time = workPoms.reduce((prev, curr) => {
+      return prev + curr.elapsed;
+    }, 0);
+    return time;
+  }
+  get totalMinutes () {
+    const totalMs = this.totalTime;
+    return Math.floor(totalMs / (1000 * 60));
   }
   initialize () {
+    this.pom = null;
     this.poms = new Array();
     this.playing = false;
+    this.queuePom();
+  }
+  next () {
     this.queuePom();
   }
   queuePom () {
@@ -32,16 +51,27 @@ class Pomlet extends EventEmitter {
     const nextPom = new Pom(pomOpts);
     this.pom = nextPom;
     this.poms.push(this.pom);
-    this.emit('newpom');
+    this.emit('new');
   }
   addTime (ms) {
     this.pom.duration += ms;
     this.pom.remaining += ms;
+    this.emit('timechange');
   }
   removeTime (ms) {
     if (this.pom.remaining < ms) return false;
     this.pom.remaining -= ms;
     this.pom.duration -= ms;
+    this.emit('timechange');
+  }
+  setTime (ms) {
+    const difference = ms - this.pom.remaining;
+    // difference may be negative
+    this.addTime(difference);
+  }
+  toggleType () {
+    this.pom.type = (this.pom.type === 'work') ? 'break' : 'work';
+    this.emit('typechange', this.pom.type);
   }
   cancel () {
     this.stop();
@@ -51,8 +81,8 @@ class Pomlet extends EventEmitter {
   }
   complete () {
     this.stop();
+    this.pom.complete();
     this.emit('complete');
-    this.queuePom();
   }
   play () {
     if (this.isPlaying) return;
@@ -82,10 +112,12 @@ class Pomlet extends EventEmitter {
     const now = Date.now();
     const changed = now - this._timestamp;
     this.pom.remaining -= changed;
+    // This is the only place that should modify `elapsed`
     this.pom.elapsed += changed;
     this._timestamp = Date.now();
     if (this.pom.remaining <= 0) {
       this.complete();
+      return;
     }
     this.emit('tick');
   }
