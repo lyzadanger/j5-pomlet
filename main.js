@@ -11,7 +11,7 @@ board.on('ready', () => {
       otherBtn: 2,
       downBtn: 6,
       upBtn: 4,
-      alerter: 5,
+      led: 5,
       metaBtn: 13,
       lcd: [7, 8, 9, 10, 11, 12]
     }
