@@ -1,5 +1,5 @@
 {
-  "name": "Pomlet",
+  "name": "pomlet",
   "version": "0.0.1",
   "description": "A grip of poms",
   "main": "main.js",
@@ -11,5 +11,19 @@
   "dependencies": {
     "johnny-five": "^0.9.58",
     "moment": "^2.13.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lyzadanger/j5-pomlet.git"
+  },
+  "keywords": [
+    "arduino",
+    "johnny-five",
+    "iot"
+  ],
+  "bugs": {
+    "url": "https://github.com/lyzadanger/j5-pomlet/issues"
+  },
+  "homepage": "https://github.com/lyzadanger/j5-pomlet#readme"
 }
