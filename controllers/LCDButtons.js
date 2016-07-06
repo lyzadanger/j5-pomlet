@@ -1,3 +1,4 @@
+'use strict';
 const five = require('johnny-five');
 const Pomlet = require('../Pomlet.js');
 
@@ -21,7 +22,8 @@ class LCDButtons {
     this.lcd.useChar('pointerright');
     this.lcd.useChar('pointerleft');
     this.lcd.useChar('pointerdown');
-
+  }
+  go () {
     this.welcome();
 
     this.pomlet.on('new', this.home.bind(this));

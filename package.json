@@ -1,7 +1,7 @@
 {
-  "name": "pomlet",
+  "name": "Pomlet",
   "version": "0.0.1",
-  "description": "A trip of poms",
+  "description": "A grip of poms",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
