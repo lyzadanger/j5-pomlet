@@ -4,15 +4,26 @@ const Pomlet = require('../Pomlet.js');
 
 class LCDButtons {
   constructor (opts) {
-    this.goBtn = new five.Button(opts.pins.goBtn);
-    this.otherBtn = new five.Button(opts.pins.otherBtn);
-    this.downBtn = new five.Button(opts.pins.downBtn);
-    this.upBtn = new five.Button(opts.pins.upBtn);
-    this.alerter = new five.Led(opts.pins.led);
-    this.metaBtn = new five.Button(opts.pins.metaBtn);
+    const options = Object.assign({}, {
+      inputPositions: {
+        goBtn: LCDButtons.INPUT_POSITIONS.RIGHT,
+        otherBtn: LCDButtons.INPUT_POSITIONS.LEFT,
+        upBtn: LCDButtons.INPUT_POSITIONS.CENTER,
+        downBtn: LCDButtons.INPUT_POSITIONS.CENTER,
+        metaBtn: LCDButtons.INPUT_POSITIONS.UPPER
+      }
+    }, opts);
+
+    this.goBtn = new five.Button(options.pins.goBtn);
+    this.otherBtn = new five.Button(options.pins.otherBtn);
+    this.downBtn = new five.Button(options.pins.downBtn);
+    this.upBtn = new five.Button(options.pins.upBtn);
+    this.alerter = new five.Led(options.pins.led);
+    this.metaBtn = new five.Button(options.pins.metaBtn);
     this.lcd = new five.LCD({
-      pins: opts.pins.lcd
+      pins: options.pins.lcd
     });
+    this.inputPositions = options.inputPositions;
 
     this.pomlet = new Pomlet();
     this.currentInterface = LCDButtons.INTERFACES.WELCOME;
@@ -100,43 +111,79 @@ class LCDButtons {
     this.currentInterface = LCDButtons.INTERFACES.WELCOME;
     this.lcd.clear();
     this.lcd.cursor(0, 2).print(':heart: Pomlet :heart:');
-    this.lcd.cursor(1, 1).print('press go btn :pointerdown:');
+    this.displayOptions({
+      goBtn: 'Press Go Btn'
+    });
   }
   home () {
     this.currentInterface = LCDButtons.INTERFACES.HOME;
     this.alerter.stop().off();
     this.lcd.clear();
     this.lcd.cursor(0, 0).print(this.pomlet.pom.type);
-    this.lcd.cursor(1, 0).print(':pointerdown:TYPE        GO:pointerdown:');
+    this.displayOptions({
+      goBtn: 'GO',
+      otherBtn: 'TYPE'
+    });
     this.updateTime(true);
   }
   playing () {
     this.currentInterface = LCDButtons.INTERFACES.PLAYING;
-    this.lcd.cursor(1, 0).print('          PAUSE:pointerright:');
+    this.displayOptions({
+      goBtn: 'PAUSE'
+    });
   }
   complete () {
     this.currentInterface = LCDButtons.INTERFACES.COMPLETE;
     this.alerter.pulse(500);
     this.lcd.clear();
     this.lcd.cursor(0, 0).print('   All done!');
-    this.lcd.cursor(1, 0).print('         ONWARD:pointerdown:');
+    this.displayOptions({
+      goBtn: 'ONWARD'
+    });
   }
   paused () {
     this.currentInterface = LCDButtons.INTERFACES.PAUSED;
-    this.lcd.cursor(1, 0).print(':pointerleft:CANCEL      GO:pointerright:');
+    this.displayOptions({
+      goBtn: 'GO',
+      otherBtn: 'CANCEL'
+    });
   }
 
   cancelConfirm () {
     this.currentInterface = LCDButtons.INTERFACES.CANCEL_CONFIRM;
     this.lcd.cursor(0, 0).print('Cancel this pom?');
-    this.lcd.cursor(1, 0).print(':pointerleft:NOPE       YEP:pointerright:');
+    this.displayOptions({
+      goBtn: 'YEP',
+      otherBtn: 'NOPE'
+    });
   }
   metaInfo () {
     this.currentInterface = LCDButtons.INTERFACES.META_INFO;
     this.lcd.clear();
     this.lcd.cursor(0, 0).print(`POMS: ${this.pomlet.pomCount}`);
     this.lcd.cursor(0, 10).print(`(${this.pomlet.totalMinutes}m)`);
-    this.lcd.cursor(1, 0).print(':pointerdown:RESET     BACK:pointerdown:');
+    this.displayOptions({
+      goBtn: 'BACK',
+      otherBtn: 'RESET'
+    });
+  }
+
+  displayOption (componentName, optionText) {
+    const position = this.inputPositions[componentName];
+    switch (position) {
+      case LCDButtons.INPUT_POSITIONS.LEFT:
+        this.lcd.cursor(1, 0).print(`:pointerleft:${optionText}`);
+        break;
+      case LCDButtons.INPUT_POSITIONS.RIGHT:
+        this.lcd.cursor(1, 15 - optionText.length)
+          .print(`${optionText}:pointerright:`);
+    }
+  }
+
+  displayOptions (options) {
+    for (var inputName in options) {
+      this.displayOption(inputName, options[inputName]);
+    }
   }
 
   updateTime (force) {
@@ -161,6 +208,13 @@ LCDButtons.INTERFACES = {
   CANCEL_CONFIRM: 4,
   COMPLETE: 5,
   META_INFO: 6
+};
+
+LCDButtons.INPUT_POSITIONS = {
+  LEFT: 0,
+  RIGHT: 1,
+  CENTER: 2,
+  UPPER: 3
 };
 
 module.exports = LCDButtons;
