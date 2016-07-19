@@ -18,16 +18,15 @@ class LCDButtons {
     this.otherBtn = new five.Button(options.pins.otherBtn);
     this.downBtn = new five.Button(options.pins.downBtn);
     this.upBtn = new five.Button(options.pins.upBtn);
-    this.alerter = new five.Led(options.pins.led);
     this.metaBtn = new five.Button(options.pins.metaBtn);
-    this.lcd = new five.LCD({
-      pins: options.pins.lcd
-    });
+    this.alerter = new five.Led(options.pins.led);
+    this.lcd = new five.LCD({  pins: options.pins.lcd });
+
     this.inputPositions = options.inputPositions;
 
     this.pomlet = new Pomlet();
+    // this.setInterface()
     this.currentInterface = LCDButtons.INTERFACES.WELCOME;
-    this.lastTimeString = null;
 
     this.lcd.useChar('heart');
     this.lcd.useChar('pointerright');
@@ -186,19 +185,22 @@ class LCDButtons {
     }
   }
 
-  updateTime (force) {
-    const timeString = this.pomlet.remaining.moment.format('mm:ss');
-    if ((timeString != this.lastTimeString) || force) {
-      this.lcd.cursor(0, 16 - timeString.length).print(timeString);
-    }
-    this.lastTimeString = timeString;
-  }
-
   updateType (toType) {
     this.lcd.cursor(0, 0).print(toType + ' ');
   }
 
 }
+
+LCDButtons.prototype.updateTime = (function () {
+  var lastTimeString = '';
+  return function (force) {
+    const timeString = this.pomlet.remaining.moment.format('mm:ss');
+    if ((timeString != lastTimeString) || force) {
+      this.lcd.cursor(0, 16 - timeString.length).print(timeString);
+    }
+    lastTimeString = timeString;
+  };
+})();
 
 LCDButtons.INTERFACES = {
   WELCOME: 0,
