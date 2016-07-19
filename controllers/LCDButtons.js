@@ -25,8 +25,6 @@ class LCDButtons {
     this.inputPositions = options.inputPositions;
 
     this.pomlet = new Pomlet();
-    // this.setInterface()
-    this.currentInterface = LCDButtons.INTERFACES.WELCOME;
 
     this.lcd.useChar('heart');
     this.lcd.useChar('pointerright');
@@ -34,137 +32,41 @@ class LCDButtons {
     this.lcd.useChar('pointerdown');
   }
   go () {
-    this.welcome();
+    this.setInterface(LCDButtons.INTERFACES.welcome);
 
-    this.pomlet.on('new', this.home.bind(this));
-    this.pomlet.on('play', this.playing.bind(this));
-    this.pomlet.on('pause', this.paused.bind(this));
+    this.pomlet.on('new', () => {
+      this.alerter.stop().off();
+      this.setInterface(LCDButtons.INTERFACES.home);
+    });
+    this.pomlet.on('play', () => {
+      this.setInterface(LCDButtons.INTERFACES.playing);
+    });
+    this.pomlet.on('pause', () => {
+      this.setInterface(LCDButtons.INTERFACES.paused);
+    });
     this.pomlet.on('tick', this.updateTime.bind(this));
     this.pomlet.on('timechange', this.updateTime.bind(this));
-    this.pomlet.on('typechange', this.updateType.bind(this));
-    this.pomlet.on('complete', this.complete.bind(this));
-
-    this.goBtn.on('press', () => {
-      switch (this.currentInterface) {
-        case LCDButtons.INTERFACES.WELCOME:
-          this.pomlet.initialize(); // will trigger new event and go home
-          break;
-        case LCDButtons.INTERFACES.HOME:
-          this.pomlet.play();
-          break;
-        case LCDButtons.INTERFACES.PLAYING:
-          this.pomlet.pause();
-          break;
-        case LCDButtons.INTERFACES.PAUSED:
-          this.pomlet.play();
-          break;
-        case LCDButtons.INTERFACES.CANCEL_CONFIRM:
-          this.pomlet.cancel();
-          break;
-        case LCDButtons.INTERFACES.COMPLETE:
-          this.pomlet.next();
-          break;
-        case LCDButtons.INTERFACES.META_INFO:
-          this.home();
-          break;
-        default:
-          break;
-      }
+    this.pomlet.on('typechange', () => { this.displayMessages(); });
+    this.pomlet.on('complete', () => {
+      this.alerter.pulse(500);
+      this.setInterface(LCDButtons.INTERFACES.complete);
     });
 
-    this.otherBtn.on('press', () => {
-      switch (this.currentInterface) {
-        case LCDButtons.INTERFACES.WELCOME:
-          break;
-        case LCDButtons.INTERFACES.HOME:
-          this.pomlet.toggleType();
-          break;
-        case LCDButtons.INTERFACES.PLAY:
-          break;
-        case LCDButtons.INTERFACES.PAUSED:
-          this.cancelConfirm();
-          break;
-        case LCDButtons.INTERFACES.META_INFO:
-          this.pomlet.reset();
-          break;
-        default:
-          break;
-      }
-    });
-
-    this.downBtn.on('press', () => {
-      this.pomlet.addTime(60 * 1000);
-    });
-
-    this.upBtn.on('press', () => {
-      this.pomlet.removeTime(60 * 1000);
-    });
-
-    this.metaBtn.on('press', () => {
-      if (this.currentInterface == LCDButtons.INTERFACES.HOME) {
-        this.metaInfo();
-      }
-    });
-  }
-  welcome () {
-    this.currentInterface = LCDButtons.INTERFACES.WELCOME;
-    this.lcd.clear();
-    this.lcd.cursor(0, 2).print(':heart: Pomlet :heart:');
-    this.displayOptions({
-      goBtn: 'Press Go Btn'
-    });
-  }
-  home () {
-    this.currentInterface = LCDButtons.INTERFACES.HOME;
-    this.alerter.stop().off();
-    this.lcd.clear();
-    this.lcd.cursor(0, 0).print(this.pomlet.pom.type);
-    this.displayOptions({
-      goBtn: 'GO',
-      otherBtn: 'TYPE'
-    });
-    this.updateTime(true);
-  }
-  playing () {
-    this.currentInterface = LCDButtons.INTERFACES.PLAYING;
-    this.displayOptions({
-      goBtn: 'PAUSE'
-    });
-  }
-  complete () {
-    this.currentInterface = LCDButtons.INTERFACES.COMPLETE;
-    this.alerter.pulse(500);
-    this.lcd.clear();
-    this.lcd.cursor(0, 0).print('   All done!');
-    this.displayOptions({
-      goBtn: 'ONWARD'
-    });
-  }
-  paused () {
-    this.currentInterface = LCDButtons.INTERFACES.PAUSED;
-    this.displayOptions({
-      goBtn: 'GO',
-      otherBtn: 'CANCEL'
-    });
+    this.goBtn.on('press', () => { this.handleInput('goBtn'); });
+    this.otherBtn.on('press', () => { this.handleInput('otherBtn'); });
+    this.upBtn.on('press', () => { this.handleInput('upBtn'); });
+    this.downBtn.on('press', () => { this.handleInput('downBtn'); });
+    this.metaBtn.on('press', () => { this.toggleMetaInterface(); });
   }
 
-  cancelConfirm () {
-    this.currentInterface = LCDButtons.INTERFACES.CANCEL_CONFIRM;
-    this.lcd.cursor(0, 0).print('Cancel this pom?');
-    this.displayOptions({
-      goBtn: 'YEP',
-      otherBtn: 'NOPE'
-    });
-  }
-  metaInfo () {
-    this.currentInterface = LCDButtons.INTERFACES.META_INFO;
-    this.lcd.clear();
-    this.lcd.cursor(0, 0).print(`POMS: ${this.pomlet.pomCount}`);
-    this.lcd.cursor(0, 10).print(`(${this.pomlet.totalMinutes}m)`);
-    this.displayOptions({
-      goBtn: 'BACK',
-      otherBtn: 'RESET'
-    });
+  handleInput (componentName) {
+    const ci = this.currentInterface;
+    if (!ci) { return false; }
+    if (ci.handlers &&
+        ci.handlers[componentName] &&
+        typeof ci.handlers[componentName] === 'function') {
+      ci.handlers[componentName].call(this);
+    }
   }
 
   displayOption (componentName, optionText) {
@@ -185,8 +87,53 @@ class LCDButtons {
     }
   }
 
-  updateType (toType) {
-    this.lcd.cursor(0, 0).print(toType + ' ');
+  displayMessages (messages) {
+    if (!messages) {
+      messages = this.currentInterface && this.currentInterface.messages;
+    }
+    messages = (typeof messages === 'function') ?
+      messages.call(this) : messages;
+    messages.forEach((message, index) => {
+      this.lcd.cursor(index, 0).print(message);
+    });
+  }
+
+  rewindInterface () {
+    this.setInterface(this.previousInterface);
+  }
+
+  setInterface (nextInterface) {
+    this.previousInterface = this.currentInterface;
+    this.currentInterface = nextInterface;
+    this.lcd.clear();
+    this.currentInterface.messages &&
+      this.displayMessages(this.currentInterface.messages);
+    this.currentInterface.options &&
+      this.displayOptions(this.currentInterface.options);
+  }
+
+  toggleMetaInterface () {
+    if (this.currentInterface === LCDButtons.INTERFACES.metaInfo) {
+      this.rewindInterface();
+    }
+    else {
+      this.setInterface(LCDButtons.INTERFACES.metaInfo);
+    }
+  }
+
+  centerLine (msg, total) {
+    const remaining = total - msg.length;
+    const pad = ' '.repeat(Math.floor(remaining / 2));
+    return `${pad}${msg}${pad}`;
+  }
+
+  fillLine (msg1, msg2, total) {
+    const pad = ' '.repeat(total - msg1.length - msg2.length);
+    return `${msg1}${pad}${msg2}`;
+  }
+
+  get timeString () {
+    return this.pomlet && this.pomlet.remaining.moment.format('mm:ss');
   }
 
 }
@@ -194,7 +141,7 @@ class LCDButtons {
 LCDButtons.prototype.updateTime = (function () {
   var lastTimeString = '';
   return function (force) {
-    const timeString = this.pomlet.remaining.moment.format('mm:ss');
+    const timeString = this.timeString;
     if ((timeString != lastTimeString) || force) {
       this.lcd.cursor(0, 16 - timeString.length).print(timeString);
     }
@@ -203,13 +150,127 @@ LCDButtons.prototype.updateTime = (function () {
 })();
 
 LCDButtons.INTERFACES = {
-  WELCOME: 0,
-  HOME: 1,
-  PLAYING: 2,
-  PAUSED: 3,
-  CANCEL_CONFIRM: 4,
-  COMPLETE: 5,
-  META_INFO: 6
+  welcome: {
+    handlers: {
+      goBtn: function () {
+        this.pomlet.initialize();
+      },
+      otherBtn: function () {
+        this.pomlet.initialize();
+      }
+    },
+    messages: [':heart: Pomlet :heart:'],
+    options: {
+      goBtn: 'Press Go Btn'
+    }
+  },
+
+  home: {
+    handlers: {
+      goBtn: function () {
+        this.pomlet.play();
+      },
+      otherBtn: function () {
+        this.pomlet.toggleType();
+      },
+      upBtn: function () {
+        this.pomlet.addTime(60 * 1000);
+      },
+      downBtn: function () {
+        this.pomlet.removeTime(60 * 1000);
+      }
+    },
+    messages: function () {
+      return [this.fillLine(this.pomlet.pom.type, this.timeString, 16)];
+    },
+    options: {
+      goBtn: 'GO',
+      otherBtn: 'TYPE'
+    }
+  },
+
+  playing: {
+    handlers: {
+      goBtn: function () {
+        this.pomlet.pause();
+      },
+      upBtn: function () {
+        this.pomlet.addTime(60 * 1000);
+      },
+      downBtn: function () {
+        this.pomlet.removeTime(60 * 1000);
+      }
+    },
+    messages: [],
+    options: {
+      goBtn: 'PAUSE'
+    }
+  },
+
+  paused: {
+    handlers: {
+      goBtn: function () { this.pomlet.play(); },
+      otherBtn: function () {
+        this.setInterface(LCDButtons.INTERFACES.cancelConfirm);
+      },
+      upBtn: function () {
+        this.pomlet.addTime(60 * 1000);
+      },
+      downBtn: function () {
+        this.pomlet.removeTime(60 * 1000);
+      }
+    },
+    messages: function () {
+      return [this.fillLine('PAUSED', `[${this.timeString}]`, 16)];
+    },
+    options: {
+      goBtn: 'GO',
+      otherBtn: 'CANCEL'
+    }
+  },
+
+  cancelConfirm: {
+    handlers: {
+      goBtn: function () { this.pomlet.cancel(); },
+      otherBtn: function () { this.rewindInterface(); }
+    },
+    messages: ['End current pom?'],
+    options: {
+      goBtn: 'YEP',
+      otherBtn: 'NOPE'
+    }
+  },
+
+  complete: {
+    handlers: {
+      goBtn: function () {
+        this.pomlet.next();
+      }
+    },
+    messages: function () {
+      return [this.centerLine('All done!', 16)];
+    },
+    options: {
+      goBtn: 'ONWARD!'
+    }
+  },
+  metaInfo: {
+    options: {
+      otherBtn: 'RESET',
+      goBtn: 'BACK'
+    },
+    handlers: {
+      goBtn: function () {
+        this.rewindInterface();
+      },
+      otherBtn: function () {
+        this.pomlet.reset();
+      }
+    },
+    messages: function () {
+      return [`${this.pomlet.pomCount}/${this.pomlet.totalMinutes}m`];
+    }
+  }
 };
 
 LCDButtons.INPUT_POSITIONS = {
