@@ -1,7 +1,8 @@
 const five = require('johnny-five');
 
+// Default configuration assumes Arduino with 5 buttons, LCD, LED
 module.exports = {
-  interface: require('./controllers/LCDButtons'),
+  interface: require('./interfaces/LCDButtons'),
   board: new five.Board(),
   pins: {
     goBtn: 3,
