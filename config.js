@@ -5,8 +5,8 @@ module.exports = {
   interface: require('./interfaces/LCDButtons'),
   board: new five.Board(),
   pins: {
-    goBtn: 3,
-    otherBtn: 2,
+    goBtn: 2,
+    otherBtn: 3,
     downBtn: 4,
     upBtn: 6,
     led: 5,

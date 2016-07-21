@@ -6,6 +6,7 @@ const moment = require('moment');
 class Pomlet extends EventEmitter {
   constructor () {
     super();
+    this.poms = new Array();
   }
   get pomCount () {
     return this.poms.filter(pom => pom.type === 'work').length;
