@@ -25,6 +25,8 @@ You shouldn't have to make any adjustments to code unless you use different pins
 
 #### Tessel 2
 
+![Wiring Diagram for LCD/Buttons interface to Pomlet on Tessel 2](assets/tessel-lcd-buttons.png)
+
 1. You'll need the `tessel-io` I/O plugin for Johnny-Five: `npm install tessel-io`
 1. Edit `main.js` to use `config-tessel.js`
 1. Make sure your components are plugged into the pins declared in `config-tessel.js`
@@ -37,7 +39,7 @@ _Note_: To run this on an Edison, I recommend that you clone this repo _to the E
 1. You'll need the `galileo-io` I/O plugin for Johnny-Five: `npm install galileo-io`
 1. Edit `main.js` to use `config-edison.js`
 1. Make sure your components are plugged into the pins declared in `config-edison.js`
-1. `node main.js` (on the Edison)
+1. `node main.js` (run this on the Edison)
 
 ### Wiring
 
