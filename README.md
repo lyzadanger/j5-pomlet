@@ -25,11 +25,11 @@ You'll need:
 1. `npm install`
 1. Continue with board-specific instructions below
 
-### Board-Specific Instructions
+## Board-Specific Instructions
 
 _Note_: The current method of swapping out `require`'d `config` modules in `main.js` is hamfisted. It got this way because of the need to run the script in contexts that might not be able to take command-line args (e.g. `t2`) but I'll make it better when I get a chance.
 
-#### Arduino-Compatible (Uno-ish) Boards
+### Arduino-Compatible (Uno-ish) Boards
 
 You shouldn't have to make any adjustments to code unless you use different pins than are declared in `config.js` for your components.
 
@@ -39,7 +39,7 @@ You shouldn't have to make any adjustments to code unless you use different pins
 1. Plug components in (TODO: fritzing)
 1. `node main.js`
 
-#### Tessel 2
+### Tessel 2
 
 ![Wiring Diagram for LCD/Buttons interface to Pomlet on Tessel 2](assets/tessel-lcd-buttons.png)
 
@@ -50,7 +50,7 @@ _Note_: Make sure to use a 3.3V LCD
 1. Make sure your components are plugged into the pins declared in `config-tessel.js`
 1. `t2 run main.js`
 
-#### Edison + Arduino
+### Edison + Arduino
 
 _Note_: To run this on an Edison, I recommend that you clone this repo _to the Edison itself_ (fortunately the default Yocto Linux on Edison comes with the `git` and the `npm` that you need).
 
