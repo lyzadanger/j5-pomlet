@@ -8,11 +8,11 @@ module.exports = {
   }),
   pins: {
     goBtn: 'b2',
-    otherBtn: 'b5',
+    otherBtn: 'a6',
     downBtn: 'b6',
     upBtn: 'b7',
-    led: 'a5',
-    metaBtn: 'a6',
+    led: 'b5',
+    metaBtn: 'a5',
     lcd: ['a0', 'a1', 'a2', 'a3', 'a4', 'a7']
   }
 };

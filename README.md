@@ -5,6 +5,19 @@ Scratching a little itch I have about simple Pomodoro timers. This code will run
 * Tessel 2
 * Raspberry Pi 3 (coming soon)
 
+### Wiring
+
+You'll need:
+
+* 3.3V _or_ 5V basic LCD display (depending on your device's logic-level voltage)
+* 5 pushbuttons
+* 5 10kΩ resistors
+* 1 standard LED
+* 1 100Ω (3.3V devices) or 220Ω (5v devices) resistor
+* 1 10kΩ potentiometer
+* A breadboard or two
+* A whole grip of jumper wires
+
 ## Install and Use
 
 1. Clone/fork/download/whatever repo
@@ -40,16 +53,3 @@ _Note_: To run this on an Edison, I recommend that you clone this repo _to the E
 1. Edit `main.js` to use `config-edison.js`
 1. Make sure your components are plugged into the pins declared in `config-edison.js`
 1. `node main.js` (run this on the Edison)
-
-### Wiring
-
-You'll need:
-
-* 5V basic LCD display
-* 5 pushbuttons
-* 5 10kΩ resistors
-* 1 LED
-* 1 220Ω resistor
-* 1 10kΩ potentiometer
-* A breadboard or two
-* A whole grip of jumper wires
