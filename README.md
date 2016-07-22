@@ -5,6 +5,7 @@ Scratching a little itch I have about simple Pomodoro timers. This code will run
 * Tessel 2
 * Raspberry Pi 3 (coming soon)
 
+
 ### Wiring
 
 You'll need:
@@ -26,6 +27,8 @@ You'll need:
 
 ### Board-Specific Instructions
 
+_Note_: The current method of swapping out `require`'d `config` modules in `main.js` is hamfisted. It got this way because of the need to run the script in contexts that might not be able to take command-line args (e.g. `t2`) but I'll make it better when I get a chance.
+
 #### Arduino-Compatible (Uno-ish) Boards
 
 You shouldn't have to make any adjustments to code unless you use different pins than are declared in `config.js` for your components.
@@ -39,6 +42,8 @@ You shouldn't have to make any adjustments to code unless you use different pins
 #### Tessel 2
 
 ![Wiring Diagram for LCD/Buttons interface to Pomlet on Tessel 2](assets/tessel-lcd-buttons.png)
+
+_Note_: Make sure to use a 3.3V LCD
 
 1. You'll need the `tessel-io` I/O plugin for Johnny-Five: `npm install tessel-io`
 1. Edit `main.js` to use `config-tessel.js`

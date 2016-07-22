@@ -1,5 +1,5 @@
 'use strict';
-const config = require('./config-tessel');
+const config = require('./config');
 const five = require('johnny-five');
 
 const board = config.board || new five.Board();
