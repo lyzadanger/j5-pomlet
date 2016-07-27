@@ -4,7 +4,7 @@ const pomPilot = require('../lib');
 
 // Pin usage is identical to Arduino
 const config = {
-  interface: require('../interfaces/LCDButtons'),
+  interface: require('../lib/interfaces/LCDButtons'),
   board: new five.Board({
     io: new Galileo()
   }),
