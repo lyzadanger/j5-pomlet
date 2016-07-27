@@ -10,7 +10,7 @@ Do the following _on the Pi_:
 1. `npm install`
 1. You'll need the `raspi-io` I/O plugin for Johnny-Five, also: `npm install raspi-io`.
 1. Double- and triple-check pin numbers for components in `index.js` and your circuit. Yes, I know. Pi pinouts are...brain-bending.
-1. `node index.js`
+1. `sudo node index.js`
 
 ## Notes
 
