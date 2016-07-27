@@ -1,75 +1,56 @@
 Scratching a little itch I have about simple Pomodoro timers. This code will run on:
 
-* Arduino Uno R3 and similar Arduino boards
-* Intel Edison + Arduino Breakout
-* Tessel 2
-* Raspberry Pi 3
+* Arduino Uno R3 and similar Arduino boards (5V)
+* Intel Edison + Arduino Breakout (3.3V)
+* Tessel 2 (3.3V)
+* Raspberry Pi 3 (3.3V)
 
-### Wiring
+Pomlet can time your [Pomodoro poms](https://en.wikipedia.org/wiki/Pomodoro_Technique). Think of it like a Pom-flavored egg timer. By default, it will alternate between work poms (25 minutes long) and break poms (5 minutes long). But you have control over that. You can swap the type of the next pom, and you can add or subtract time (in minute increments) any time you want, even when the pom is running. This breaks the core Pomodoro rules, but I find that tasks don't always neatly fit into 25 minutes and sometimes interruptions happen. Poms can be paused. A paused pom can be canceled.
 
-You'll need:
+Pressing the `metaBtn` will show a summary of total poms completed and total minutes pom-med so far (only "work" poms are counted in the running total). You can reset the Pomlet—kind of like a trip odometer in a car—and start over. The Pomlet will alert you when time's up in your current pom. That's pretty much it!
 
-* 3.3V _or_ 5V basic LCD display (depending on your device's logic-level voltage)
+## LCD and Buttons Interface
+
+The default (currently only) interface for Pomlet is a circuit containing an LCD display, five control buttons and an LED that will pulse when "time's up".
+
+### What you'll Need
+
+* 1 compatible board/platform
+* 3.3V _or_ 5V basic 16x2 parallel LCD display (depending on your device's logic-level voltage)
 * 5 pushbuttons
 * 5 10kΩ resistors
-* 1 standard LED
+* 1 standard LED, any color you like
 * 1 100Ω (3.3V devices) or 220Ω (5v devices) resistor
 * 1 10kΩ potentiometer
-* A breadboard or two
+* One full-plus breadboard
 * A whole grip of jumper wires
 
-## Install and Use
+### The Circuit
 
-1. Clone/fork/download/whatever repo
-1. `npm install`
-1. Continue with board-specific instructions below
+Every Pomlet-running platform shares the same circuit, with two differences:
 
-## Board-Specific Instructions
+* Choose the right LCD for your platform: 3.3V or 5V. Arduinos are 5V; so far the other supported platforms are 3.3V. The pinouts are identical. It's fast to swap these out.
+* You may want to use a 100Ω resistor for the LED on 3.3V devices. However, a 220Ω is fine, really.
 
-_Note_: The current method of swapping out `require`'d `config` modules in `main.js` is hamfisted. It got this way because of the need to run the script in contexts that might not be able to take command-line args (e.g. `t2`) but I'll make it better when I get a chance.
+![The shared Pomlet Circuit](assets/lcd-buttons.png)
 
-### Arduino-Compatible (Uno-ish) Boards
+#### Some Notes on the Circuit
 
-![Wiring Diagram for LCD/Buttons interface to Pomlet on Arduino Uno](assets/arduino-uno-lcd-buttons.png)
+The wiring diagram here shows the circuit without connections to a board, using a full-plus breadboard. It shows a 3.3V variant, with a 100Ω resistor for the LED.
 
-You shouldn't have to make any adjustments to code unless you use different pins than are declared in `config.js` for your components.
+The following can be inferred visually from the wiring diagram, but are detailed here in case it helps:
 
-`node main.js`
+* Note especially some of the on-breadboard power wires.
+* The power rails need to be connected midway down the length (power rails don't run the full length of most half-plus boards).
+* Make sure there is power bridging the central notch for `otherBtn` and `goBtn` and _triple-check_ the orientation of those buttons.
+* LCD should be connected to ground on pins 1, 5, 16 and VCC on 2 and 15.
+* Output of the potentiometer runs into pin 3 of the LCD.
 
-1. `npm install`
-1. Plug components in (TODO: fritzing)
-1. `node main.js`
+### Make it Go!
 
-### Tessel 2
+Follow board-specific hookup and software instructions for each `platform-`:
 
-![Wiring Diagram for LCD/Buttons interface to Pomlet on Tessel 2](assets/tessel-lcd-buttons.png)
-
-_Note_: Make sure to use a 3.3V LCD
-
-1. You'll need the `tessel-io` I/O plugin for Johnny-Five: `npm install tessel-io`
-1. Edit `main.js` to use `config-tessel.js`
-1. Make sure your components are plugged into the pins declared in `config-tessel.js`
-1. `t2 run main.js`
-
-### Edison + Arduino
-
-![Wiring Diagram for LCD/Buttons interface to Pomlet on Intel Edison + Arduino](assets/intel-edison-lcd-buttons.png)
-
-_Note_: To run this on an Edison, I recommend that you clone this repo _to the Edison itself_ (fortunately the default Yocto Linux on Edison comes with the `git` and the `npm` that you need).
-
-1. You'll need the `galileo-io` I/O plugin for Johnny-Five: `npm install galileo-io`
-1. Edit `main.js` to use `config-edison.js`
-1. Make sure your components are plugged into the pins declared in `config-edison.js`
-1. `node main.js` (run this on the Edison)
-
-### Raspberry Pi 3
-
-![Wiring Diagram for LCD/Buttons interface to Pomlet on Raspberry Pi 3](assets/raspberry-pi-3-lcd-buttons.png)
-
-Depending on your setup, you may not be plugging directly into the Raspberry Pi's GPIO on-board pins. The wiring diagram here is pretty nasty looking, but if you're using a SparkFun Pi Wedge, the connections are a little more sane. Make sure your connections, in the end, correspond with the pins in `config-pi-3.js`. The wiki for `raspi-io` has a pretty good [lookup table of all pinouts](https://github.com/nebrius/raspi-io/wiki/Pin-Information) if you get lost.
-
-_Note_: I've not tested it, but I see no reason that this wouldn't work on Raspberry Pi 2, Model B or any of the other Raspberry Pis that have a compatible GPIO pinout.
-
-1. You'll need the `raspi-io` I/O plugin for Johnny-Five: `npm install raspi-io`.
-2. Edit `main.js` to use `config-pi-3.js`
-3. Double- and triple-check pin numbers for components in `config-pi-3.js` and your circuit. Yes, I know. Pi pinouts are...brain-bending.
+* [Arduino Uno R3 and similar Arduino boards (5V)](platform-arduino-uno)
+* [Intel Edison + Arduino Breakout (3.3V)](platform-intel-edison)
+* [Tessel 2 (3.3V)](platform-tessel-2)
+* [Raspberry Pi 3 (3.3V)](platform-raspberry-pi-3)

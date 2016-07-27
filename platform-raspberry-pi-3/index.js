@@ -1,8 +1,9 @@
 const five = require('johnny-five');
 const Raspi = require('raspi-io');
+const pomPilot = require('../lib');
 
-module.exports = {
-  interface: require('./interfaces/LCDButtons'),
+const config = {
+  interface: require('../interfaces/LCDButtons'),
   board: new five.Board({
     io: new Raspi()
   }),
@@ -16,3 +17,5 @@ module.exports = {
     lcd: ['P1-15', 'P1-16', 'P1-18', 'P1-22', 'P1-37', 'P1-13']
   }
 };
+
+pomPilot(config);

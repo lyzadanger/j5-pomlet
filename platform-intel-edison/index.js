@@ -1,9 +1,10 @@
 const five = require('johnny-five');
 const Galileo = require('galileo-io');
+const pomPilot = require('../lib');
 
 // Pin usage is identical to Arduino
-module.exports = {
-  interface: require('./interfaces/LCDButtons'),
+const config = {
+  interface: require('../interfaces/LCDButtons'),
   board: new five.Board({
     io: new Galileo()
   }),
@@ -17,3 +18,5 @@ module.exports = {
     lcd: [7, 8, 9, 10, 11, 12]
   }
 };
+
+pomPilot(config);

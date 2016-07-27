@@ -1,8 +1,9 @@
 const five = require('johnny-five');
 const Tessel = require('tessel-io');
+const pomPilot = require('../lib');
 
-module.exports = {
-  interface: require('./interfaces/LCDButtons'),
+const config = {
+  interface: require('../interfaces/LCDButtons'),
   board: new five.Board({
     io: new Tessel()
   }),
@@ -16,3 +17,5 @@ module.exports = {
     lcd: ['a0', 'a1', 'a2', 'a3', 'a4', 'a7']
   }
 };
+
+pomPilot(config);
